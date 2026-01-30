@@ -15,6 +15,13 @@ interface EditorState {
   reorderLayers: (oldIndex: number, newIndex: number) => void;
   setDimensions: (width: number, height: number) => void;
   setRotation: (angle: number) => void;
+  // History
+  undoStack: string[];
+  redoStack: string[];
+  historyProcessing: boolean;
+  saveHistory: () => void;
+  undo: () => void;
+  redo: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -86,5 +93,80 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     canvas.requestRenderAll();
     set({ selectedObjects: [...selectedObjects] });
+  },
+
+  // History
+  undoStack: [],
+  redoStack: [],
+  historyProcessing: false, // Flag to prevent saving history during undo/redo
+
+  saveHistory: () => {
+    const { canvas, historyProcessing, undoStack } = get();
+    if (!canvas || historyProcessing) return;
+
+    const json = JSON.stringify(canvas.toJSON());
+
+    // Avoid duplicates if possible (simple check)
+    if (undoStack.length > 0 && undoStack[undoStack.length - 1] === json)
+      return;
+
+    set({
+      undoStack: [...undoStack, json],
+      redoStack: [], // Clear redo on new action
+    });
+  },
+
+  undo: async () => {
+    const { canvas, undoStack, redoStack, historyProcessing } = get();
+    if (!canvas || undoStack.length === 0 || historyProcessing) return;
+
+    set({ historyProcessing: true });
+
+    // Current state -> redo stack
+    const currentJson = JSON.stringify(canvas.toJSON());
+    const prevState = undoStack[undoStack.length - 1];
+    const newUndoStack = undoStack.slice(0, -1);
+
+    set({
+      undoStack: newUndoStack,
+      redoStack: [...redoStack, currentJson],
+    });
+
+    await canvas.loadFromJSON(JSON.parse(prevState));
+    canvas.requestRenderAll();
+
+    // Refresh layers and selection triggers
+    set({
+      layers: [...canvas.getObjects()],
+      selectedObjects: [], // Clear selection to avoid stale references
+      historyProcessing: false,
+    });
+  },
+
+  redo: async () => {
+    const { canvas, undoStack, redoStack, historyProcessing } = get();
+    if (!canvas || redoStack.length === 0 || historyProcessing) return;
+
+    set({ historyProcessing: true });
+
+    const nextState = redoStack[redoStack.length - 1];
+    const newRedoStack = redoStack.slice(0, -1);
+
+    // Current state -> undo stack
+    const currentJson = JSON.stringify(canvas.toJSON());
+
+    set({
+      undoStack: [...undoStack, currentJson],
+      redoStack: newRedoStack,
+    });
+
+    await canvas.loadFromJSON(JSON.parse(nextState));
+    canvas.requestRenderAll();
+
+    set({
+      layers: [...canvas.getObjects()],
+      selectedObjects: [],
+      historyProcessing: false,
+    });
   },
 }));

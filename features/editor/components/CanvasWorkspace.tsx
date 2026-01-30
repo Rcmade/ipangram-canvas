@@ -54,8 +54,42 @@ export const CanvasWorkspace = () => {
     // Initialize Snapping
     initSnapping(canvas);
 
-    // Keyboard Nudging
+    // History Tracking
+    const saveState = () => useEditorStore.getState().saveHistory();
+
+    canvas.on("object:added", (e) => {
+      updateLayers();
+      saveState();
+    });
+    canvas.on("object:removed", (e) => {
+      updateLayers();
+      saveState();
+    });
+    canvas.on("object:modified", (e) => {
+      updateLayers();
+      saveState();
+    });
+
+    // Save initial state
+    saveState();
+
+    // Keyboard Nudging & Undo/Redo
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Undo/Redo
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        useEditorStore.getState().undo();
+        return;
+      }
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        (e.key === "y" || (e.shiftKey && e.key === "Z"))
+      ) {
+        e.preventDefault();
+        useEditorStore.getState().redo();
+        return;
+      }
+
       const activeObj = canvas.getActiveObject();
       if (!activeObj) return;
 
@@ -85,6 +119,12 @@ export const CanvasWorkspace = () => {
         e.preventDefault();
         activeObj.setCoords();
         canvas.requestRenderAll();
+        // We should save state on keyboard move end if possible,
+        // but for now let's save on every move or rely on 'object:modified'
+        // which might not fire for programmatic set.
+        // Fabric fires 'object:modified' usually on mouse up.
+        // For keys, we trigger manually.
+        canvas.fire("object:modified");
       }
     };
 
