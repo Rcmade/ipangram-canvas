@@ -6,7 +6,7 @@ import { CanvasWorkspace } from "./CanvasWorkspace";
 
 export const EditorLayout = () => {
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-white dark:bg-black text-black dark:text-white">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-background text-foreground">
       {/* Top Toolbar */}
       <div className="h-16 flex-none z-10 relative">
         <Toolbar />

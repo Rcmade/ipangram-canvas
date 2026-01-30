@@ -14,13 +14,24 @@ import {
   Type,
   Image as ImageIcon,
   Star as StarIcon,
+  Download,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { jsPDF } from "jspdf";
+import {
+  DropdownMenu,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ThemeButton } from "@/components/buttons/ThemeButton";
 
 export const Toolbar = () => {
   const { canvas } = useEditorStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showIconPicker, setShowIconPicker] = useState(false);
 
   const addCircle = () => {
     if (!canvas) return;
@@ -104,64 +115,110 @@ export const Toolbar = () => {
     } catch (e) {
       console.error("Failed to add icon", e);
     }
-    setShowIconPicker(false);
+  };
+
+  const handleExport = (format: "png" | "jpeg" | "pdf") => {
+    if (!canvas) return;
+
+    // Clear selection
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+
+    if (format === "pdf") {
+      const width = canvas.width || 600;
+      const height = canvas.height || 350;
+
+      const imgData = canvas.toDataURL({
+        format: "png",
+        quality: 1,
+        multiplier: 2, // High resolution for PDF
+      });
+
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "px",
+        format: [width, height],
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, width, height);
+      pdf.save("design.pdf");
+    } else {
+      const dataURL = canvas.toDataURL({
+        format,
+        quality: 1,
+        multiplier: 4, // 4x resolution for images
+      });
+
+      const link = document.createElement("a");
+      link.href = dataURL;
+      link.download = `design.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 border-b border-gray-200 bg-white dark:bg-black dark:border-gray-800">
-      <button
-        onClick={addCircle}
-        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex flex-col items-center gap-1"
-      >
+    <div className="flex items-center gap-4 p-4 border-b border-border bg-background">
+      <Button onClick={addCircle}>
         <CircleIcon size={20} />
         <span className="text-xs">Circle</span>
-      </button>
-      <button
-        onClick={addRect}
-        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex flex-col items-center gap-1"
-      >
+      </Button>
+      <Button onClick={addRect}>
         <Square size={20} />
         <span className="text-xs">Rect</span>
-      </button>
-      <button
-        onClick={addText}
-        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex flex-col items-center gap-1"
-      >
+      </Button>
+      <Button onClick={addText}>
         <Type size={20} />
         <span className="text-xs">Text</span>
-      </button>
-      <button
-        onClick={handleImageClick}
-        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex flex-col items-center gap-1"
-      >
+      </Button>
+      <Button onClick={handleImageClick}>
         <ImageIcon size={20} />
         <span className="text-xs">Image</span>
-      </button>
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">
+            <StarIcon size={20} />
+            <span className="text-xs">Icons</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-32 grid grid-cols-2 gap-2 p-2">
+          {Object.entries(ICONS).map(([name, svg]) => (
+            <DropdownMenuItem
+              key={name}
+              onClick={() => addIcon(svg)}
+              className="p-2 justify-center h-10 w-10 cursor-pointer"
+              title={name}
+            >
+              <div dangerouslySetInnerHTML={{ __html: svg }} />
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ThemeButton />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="ml-auto flex gap-2 mr-5">
+            <Download size={20} />
+            <span className="text-xs">Export</span>
+          </Button>
+        </DropdownMenuTrigger>
 
-      <div className="relative">
-        <button
-          onClick={() => setShowIconPicker(!showIconPicker)}
-          className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex flex-col items-center gap-1 ${showIconPicker ? "bg-gray-100 dark:bg-gray-800" : ""}`}
-        >
-          <StarIcon size={20} />
-          <span className="text-xs">Icons</span>
-        </button>
-
-        {showIconPicker && (
-          <div className="absolute top-full left-0 mt-2 p-2 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-800 shadow-xl rounded-lg grid grid-cols-2 gap-2 z-50 w-32">
-            {Object.entries(ICONS).map(([name, svg]) => (
-              <button
-                key={name}
-                onClick={() => addIcon(svg)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex items-center justify-center border border-transparent hover:border-gray-200 dark:hover:border-gray-700 h-10 w-10"
-                dangerouslySetInnerHTML={{ __html: svg }}
-                title={name}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
+        <DropdownMenuContent>
+          <DropdownMenuLabel>Export</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => handleExport("png")}>
+            Export PNG
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport("jpeg")}>
+            Export JPG
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport("pdf")}>
+            Export PDF
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <input
         type="file"
         ref={fileInputRef}

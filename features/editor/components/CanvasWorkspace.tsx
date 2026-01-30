@@ -14,17 +14,10 @@ export const CanvasWorkspace = () => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Resolve the CSS variable for background color
-    const computedStyle = getComputedStyle(document.documentElement);
-    const bgColor = computedStyle.getPropertyValue("--background").trim();
-
-    // Fallback if variable is missing or empty
-    const finalColor = bgColor || "#ffffff";
-
     const canvas = new Canvas(canvasRef.current, {
       width: 600,
       height: 350,
-      backgroundColor: finalColor,
+      backgroundColor: "#ffffff",
       preserveObjectStacking: true,
     });
 
@@ -57,15 +50,15 @@ export const CanvasWorkspace = () => {
     // History Tracking
     const saveState = () => useEditorStore.getState().saveHistory();
 
-    canvas.on("object:added", (e) => {
+    canvas.on("object:added", () => {
       updateLayers();
       saveState();
     });
-    canvas.on("object:removed", (e) => {
+    canvas.on("object:removed", () => {
       updateLayers();
       saveState();
     });
-    canvas.on("object:modified", (e) => {
+    canvas.on("object:modified", () => {
       updateLayers();
       saveState();
     });
@@ -119,11 +112,6 @@ export const CanvasWorkspace = () => {
         e.preventDefault();
         activeObj.setCoords();
         canvas.requestRenderAll();
-        // We should save state on keyboard move end if possible,
-        // but for now let's save on every move or rely on 'object:modified'
-        // which might not fire for programmatic set.
-        // Fabric fires 'object:modified' usually on mouse up.
-        // For keys, we trigger manually.
         canvas.fire("object:modified");
       }
     };
@@ -138,7 +126,10 @@ export const CanvasWorkspace = () => {
 
   return (
     <div className="flex-1 bg-background flex items-center justify-center p-8 overflow-auto focus:outline-none">
-      <div className="shadow-lg relative" style={{ width: 600, height: 350 }}>
+      <div
+        className="shadow-lg relative bg-white"
+        style={{ width: 600, height: 350 }}
+      >
         <canvas ref={canvasRef} />
       </div>
     </div>

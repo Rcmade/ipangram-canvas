@@ -9,6 +9,18 @@ import {
   Image as ImageIcon,
   Palette,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 interface IEditorProperties {
   fill: string | TFiller | null;
@@ -130,12 +142,12 @@ export const PropertiesPanel = () => {
 
   if (!selectedObject) {
     return (
-      <div className="flex flex-col h-full bg-background border-l border-gray-200 dark:border-gray-800">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center gap-2">
+      <div className="flex flex-col h-full bg-background border-l border-border">
+        <div className="p-4 border-b border-border font-semibold flex items-center gap-2 text-foreground">
           <Settings size={20} />
           Properties
         </div>
-        <div className="p-4 text-gray-500 text-sm">
+        <div className="p-4 text-muted-foreground text-sm">
           Select an element to edit properties
         </div>
       </div>
@@ -147,176 +159,181 @@ export const PropertiesPanel = () => {
   const isImage = selectedObject.type === "image";
 
   return (
-    <div className="flex flex-col h-full bg-background border-l border-gray-200 dark:border-gray-800">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
+    <div className="flex flex-col h-full bg-background border-l border-border">
+      <div className="p-4 border-b border-border font-semibold flex items-center justify-between text-foreground">
         <div className="flex items-center gap-2">
           <Settings size={20} />
           <span>Properties</span>
         </div>
-        <span className="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+        <span className="text-xs text-muted-foreground uppercase bg-muted px-2 py-1 rounded">
           {selectedObject.type}
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
         {/* Dimensions & Position */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
+        <div className="flex flex-col gap-4">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
             Layout
           </h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-4">
             {/* Position */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-400 uppercase">X</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                X
+              </Label>
+              <Input
                 type="number"
                 value={props.left || 0}
                 onChange={(e) => handleChange("left", Number(e.target.value))}
-                className="p-1 border rounded text-sm bg-transparent"
+                className="h-8"
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-400 uppercase">Y</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                Y
+              </Label>
+              <Input
                 type="number"
                 value={props.top || 0}
                 onChange={(e) => handleChange("top", Number(e.target.value))}
-                className="p-1 border rounded text-sm bg-transparent"
+                className="h-8"
               />
             </div>
 
             {/* Dimensions */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-400 uppercase">W</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                W
+              </Label>
+              <Input
                 type="number"
                 value={Math.round((props.width || 0) * (props.scaleX || 1))}
                 onChange={(e) => handleChange("width", Number(e.target.value))}
                 disabled={selectedObject.type === "activeSelection"}
-                className={`p-1 border rounded text-sm bg-transparent ${selectedObject.type === "activeSelection" ? "opacity-50 cursor-not-allowed" : ""}`}
+                className="h-8"
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-400 uppercase">H</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                H
+              </Label>
+              <Input
                 type="number"
                 value={Math.round((props.height || 0) * (props.scaleY || 1))}
                 onChange={(e) => handleChange("height", Number(e.target.value))}
                 disabled={selectedObject.type === "activeSelection"}
-                className={`p-1 border rounded text-sm bg-transparent ${selectedObject.type === "activeSelection" ? "opacity-50 cursor-not-allowed" : ""}`}
+                className="h-8"
               />
             </div>
 
             {/* Rotation */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-400 uppercase">
-                Rotation
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={Math.round(props.angle || 0)}
-                  onChange={(e) =>
-                    handleChange("angle", Number(e.target.value))
-                  }
-                  className="p-1 border rounded text-sm bg-transparent flex-1"
-                />
-                <span className="text-xs text-gray-400">deg</span>
-              </div>
+            <div className="flex flex-col gap-2 col-span-2">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                Rotation (deg)
+              </Label>
+              <Input
+                type="number"
+                value={Math.round(props.angle || 0)}
+                onChange={(e) => handleChange("angle", Number(e.target.value))}
+                className="h-8"
+              />
             </div>
           </div>
-          <div className="flex flex-col gap-1 mt-1">
-            <label className="text-[10px] text-gray-400 uppercase">
-              Opacity
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={props.opacity || 1}
-                onChange={(e) =>
-                  handleChange("opacity", Number(e.target.value))
-                }
-                className="flex-1"
-              />
-              <span className="text-xs w-8 text-right">
-                {Math.round((props.opacity || 1) * 100)}%
-              </span>
-            </div>
+          <div className="flex flex-col gap-2 mt-2">
+            <Label className="text-[10px] text-muted-foreground uppercase">
+              Opacity ({Math.round((props.opacity || 1) * 100)}%)
+            </Label>
+            <Slider
+              min={0}
+              max={1}
+              step={0.01}
+              value={[props.opacity || 1]}
+              onValueChange={(vals) => handleChange("opacity", vals[0])}
+            />
           </div>
         </div>
 
         {/* Text Properties */}
         {isText && (
-          <div className="flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
+          <div className="flex flex-col gap-4">
+            <Separator />
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
               <Type size={14} /> Text
             </h3>
             <div className="flex flex-col gap-2">
-              <input
+              <Input
                 type="text"
                 value={props.text || ""}
                 onChange={(e) => handleChange("text", e.target.value)}
-                className="p-1 border rounded text-sm bg-transparent w-full"
+                className="h-8"
               />
               <div className="grid grid-cols-2 gap-2">
-                <select
+                <Select
                   value={props.fontFamily}
-                  onChange={(e) => handleChange("fontFamily", e.target.value)}
-                  className="p-1 border rounded text-xs bg-transparent"
+                  onValueChange={(val) => handleChange("fontFamily", val)}
                 >
-                  <option value="Arial">Arial</option>
-                  <option value="Times New Roman">Times New Roman</option>
-                  <option value="Courier New">Courier New</option>
-                  <option value="Verdana">Verdana</option>
-                </select>
-                <input
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Arial">Arial</SelectItem>
+                    <SelectItem value="Times New Roman">
+                      Times New Roman
+                    </SelectItem>
+                    <SelectItem value="Courier New">Courier New</SelectItem>
+                    <SelectItem value="Verdana">Verdana</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
                   type="number"
                   value={props.fontSize || 12}
                   onChange={(e) =>
                     handleChange("fontSize", Number(e.target.value))
                   }
-                  className="p-1 border rounded text-sm bg-transparent"
+                  className="h-8"
                 />
               </div>
-              <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-900 p-1 rounded justify-center">
-                <button
+              <div className="flex items-center gap-1 bg-muted p-1 rounded justify-center">
+                <Button
+                  variant={props.fontWeight === "bold" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
                   onClick={() =>
                     handleChange(
                       "fontWeight",
                       props.fontWeight === "bold" ? "normal" : "bold",
                     )
                   }
-                  className={`p-1 rounded ${props.fontWeight === "bold" ? "bg-white dark:bg-black shadow" : "hover:bg-white dark:hover:bg-black"}`}
                 >
                   <Bold size={14} />
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant={props.fontStyle === "italic" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
                   onClick={() =>
                     handleChange(
                       "fontStyle",
                       props.fontStyle === "italic" ? "normal" : "italic",
                     )
                   }
-                  className={`p-1 rounded ${props.fontStyle === "italic" ? "bg-white dark:bg-black shadow" : "hover:bg-white dark:hover:bg-black"}`}
                 >
                   <Italic size={14} />
-                </button>
+                </Button>
               </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] text-gray-400 uppercase">
+              <div className="flex flex-col gap-2">
+                <Label className="text-[10px] text-muted-foreground uppercase">
                   Color
-                </label>
+                </Label>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="color"
                     value={
                       typeof props.fill === "string" ? props.fill : "#000000"
                     }
                     onChange={(e) => handleChange("fill", e.target.value)}
-                    className="w-full h-8 rounded border cursor-pointer"
+                    className="w-full h-8 p-1 cursor-pointer"
                   />
                 </div>
               </div>
@@ -326,16 +343,18 @@ export const PropertiesPanel = () => {
 
         {/* Image Properties */}
         {isImage && (
-          <div className="flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
+          <div className="flex flex-col gap-4">
+            <Separator />
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
               <ImageIcon size={14} /> Image
             </h3>
-            <button
+            <Button
+              variant="secondary"
               onClick={handleImageReplaceClick}
-              className="w-full py-2 px-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-sm flex items-center justify-center gap-2 transition-colors"
+              className="w-full"
             >
-              <ImageIcon size={14} /> Replace Image
-            </button>
+              <ImageIcon size={14} className="mr-2" /> Replace Image
+            </Button>
             <input
               type="file"
               ref={fileInputRef}
@@ -348,38 +367,39 @@ export const PropertiesPanel = () => {
 
         {/* Shape Appearance (Fill/Stroke) */}
         {!isImage && !isText && (
-          <div className="flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
+          <div className="flex flex-col gap-4">
+            <Separator />
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
               <Palette size={14} /> Appearance
             </h3>
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] text-gray-400 uppercase">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label className="text-[10px] text-muted-foreground uppercase">
                   Fill
-                </label>
+                </Label>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="color"
                     value={
                       typeof props.fill === "string" ? props.fill : "#000000"
                     }
                     onChange={(e) => handleChange("fill", e.target.value)}
-                    className="w-8 h-8 rounded border"
+                    className="w-8 h-8 p-0 border-0"
                   />
-                  <input
+                  <Input
                     type="text"
                     value={typeof props.fill === "string" ? props.fill : ""}
                     onChange={(e) => handleChange("fill", e.target.value)}
-                    className="flex-1 p-1 border rounded text-sm bg-transparent"
+                    className="flex-1 h-8"
                   />
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] text-gray-400 uppercase">
+              <div className="flex flex-col gap-2">
+                <Label className="text-[10px] text-muted-foreground uppercase">
                   Stroke
-                </label>
+                </Label>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="color"
                     value={
                       typeof props.stroke === "string"
@@ -387,16 +407,16 @@ export const PropertiesPanel = () => {
                         : "#000000"
                     }
                     onChange={(e) => handleChange("stroke", e.target.value)}
-                    className="w-8 h-8 rounded border"
+                    className="w-8 h-8 p-0 border-0"
                   />
-                  <input
+                  <Input
                     type="number"
                     min="0"
                     value={props.strokeWidth || 0}
                     onChange={(e) =>
                       handleChange("strokeWidth", Number(e.target.value))
                     }
-                    className="flex-1 p-1 border rounded text-sm bg-transparent"
+                    className="flex-1 h-8"
                     placeholder="Width"
                   />
                 </div>

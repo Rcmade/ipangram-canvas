@@ -40,7 +40,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     });
 
     canvas.requestRenderAll();
-    // trigger update
     set({ selectedObjects: [...selectedObjects] });
   },
   reorderLayers: (oldIndex, newIndex) => {
@@ -59,15 +58,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!canvas || selectedObjects.length === 0) return;
 
     selectedObjects.forEach((obj) => {
-      // If it's a group or we want to simulate resizing by scaling:
-      // Object width/height in Fabric are "local" dimensions.
-      // To resize visually on canvas we modify scaleX/scaleY usually,
-      // OR we modify width/height and reset scale to 1.
-
-      // Best practice for inputs:
-      // If input W = 200, and object W = 100, scaleX = 2.
-      // We calculate required scale.
-
       if (obj.width && obj.height) {
         const scaleX = width / obj.width;
         const scaleY = height / obj.height;
@@ -86,7 +76,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!canvas || selectedObjects.length === 0) return;
 
     selectedObjects.forEach((obj) => {
-      // Normalize angle 0-360 if preferred, but Fabric accepts any.
       obj.set("angle", angle);
       obj.setCoords();
     });
@@ -95,10 +84,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ selectedObjects: [...selectedObjects] });
   },
 
-  // History
   undoStack: [],
   redoStack: [],
-  historyProcessing: false, // Flag to prevent saving history during undo/redo
+  historyProcessing: false,
 
   saveHistory: () => {
     const { canvas, historyProcessing, undoStack } = get();
@@ -112,7 +100,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     set({
       undoStack: [...undoStack, json],
-      redoStack: [], // Clear redo on new action
+      redoStack: [],
     });
   },
 
@@ -135,10 +123,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     await canvas.loadFromJSON(JSON.parse(prevState));
     canvas.requestRenderAll();
 
-    // Refresh layers and selection triggers
     set({
       layers: [...canvas.getObjects()],
-      selectedObjects: [], // Clear selection to avoid stale references
+      selectedObjects: [],
       historyProcessing: false,
     });
   },
