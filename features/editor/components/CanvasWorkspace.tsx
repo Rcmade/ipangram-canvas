@@ -19,6 +19,7 @@ export const CanvasWorkspace = () => {
       height: 350,
       backgroundColor: "#ffffff",
       preserveObjectStacking: true,
+      selectionKey: "shiftKey",
     });
 
     setCanvas(canvas);

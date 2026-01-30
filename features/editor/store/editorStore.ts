@@ -93,7 +93,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     const json = JSON.stringify(canvas.toJSON());
 
-    // Avoid duplicates if possible (simple check)
     if (undoStack.length > 0 && undoStack[undoStack.length - 1] === json)
       return;
 
