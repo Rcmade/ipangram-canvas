@@ -15,7 +15,6 @@ interface EditorState {
   reorderLayers: (oldIndex: number, newIndex: number) => void;
   setDimensions: (width: number, height: number) => void;
   setRotation: (angle: number) => void;
-  // History
   undoStack: string[];
   redoStack: string[];
   historyProcessing: boolean;
