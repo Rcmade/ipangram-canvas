@@ -12,6 +12,7 @@ interface EditorState {
     key: keyof FabricObject,
     value: string | number | boolean | null,
   ) => void;
+  reorderLayers: (oldIndex: number, newIndex: number) => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -26,13 +27,22 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!canvas || selectedObjects.length === 0) return;
 
     selectedObjects.forEach((obj) => {
-      // FabricObject.set supports key/value pairs.
-      // We cast key to string because Fabric's set method signature expects string or object
-      obj.set(key as string, value);
+      obj.set(key, value);
     });
 
     canvas.requestRenderAll();
     // trigger update
     set({ selectedObjects: [...selectedObjects] });
+  },
+  reorderLayers: (oldIndex, newIndex) => {
+    const { canvas, layers } = get();
+    if (!canvas || !layers[oldIndex]) return;
+
+    const obj = layers[oldIndex];
+
+    canvas.moveObjectTo(obj, newIndex);
+    canvas.requestRenderAll();
+
+    set({ layers: [...canvas.getObjects()] });
   },
 }));
